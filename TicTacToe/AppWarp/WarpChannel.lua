@@ -1,4 +1,4 @@
-require "socket"
+local socket = require ("socket")
     
 local WarpChannel = {}    
 local client_socket = nil
@@ -8,7 +8,7 @@ WarpChannel.isConnected = false
 function WarpChannel.socket_connect()
   
   if(client_socket == nil) then    
-    client_socket = socket.tcp();
+    client_socket = assert(socket.tcp());
     client_socket:settimeout(0)
   end
   if(WarpChannel.isConnected == true) then
@@ -31,6 +31,7 @@ end
 
 function WarpChannel.socket_send(buffer)
   client_socket:send(buffer)
+  tcpLastSendTime = os.time()
 end
   
 function WarpChannel.socket_recv()

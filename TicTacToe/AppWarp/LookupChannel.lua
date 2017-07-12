@@ -1,24 +1,35 @@
-require "socket"
-require "AppWarp.WarpConfig"    
-local LookupChannel = {}    
+local socket = require ("socket")
+require "AppWarp.WarpConfig" 
 local client_socket = nil
+   
+local LookupChannel = {}    
 
 LookupChannel.isConnected = false
 
 function LookupChannel.socket_connect()
-  
-  if(client_socket == nil) then    
-    client_socket = socket.tcp();
+  print( "\n1: LookupChannel.socket_connect")
+  if(client_socket == nil) then
+  print( "\n2: LookupChannel.socket_connect")    
+    client_socket = assert(socket.tcp());
+    print( "\n3: LookupChannel.socket_connect")
     client_socket:settimeout(0)
+    print( "\n4: LookupChannel.socket_connect")
   end
+  print( "\n5: LookupChannel.socket_connect")
   if(LookupChannel.isConnected == true) then
     return
   end
+  print( "\n6: LookupChannel.socket_connect")
+  warplog("look up server address is "..WarpConfig.lookup_host)
   local status, err = client_socket:connect(WarpConfig.lookup_host, WarpConfig.lookup_port)
+  print( "\n7: LookupChannel.socket_connect")
   if(err == "already connected")  then
+  print( "\n8: LookupChannel.socket_connect")
     LookupChannel.isConnected = true;
     warplog("lookup connected")   
+    print( "\n9: LookupChannel.socket_connect")
     LookupChannel.sendRequest();
+    print( "\n10: LookupChannel.socket_connect")
   else
     --warplog("error is "..tostring(err));
   end

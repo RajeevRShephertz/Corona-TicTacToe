@@ -7,16 +7,58 @@ warplog = function(message)
   end
   
   message = tostring(message);
-  print(os.clock().." : "..message);
+ 
 end
  
  function isUserNameValid(input)
    local length = string.len(input);
-   if(length <= 25) then
+   if(length <= 48) then
      return true;
    else 
      return false;
    end   
+ end
+ 
+ function isCompleteMessage(message, offset)
+          
+   local length = string.len(message) - offset;
+   local messageType = string.byte(message, offset+1, offset+1);
+   if(messageType == WarpMessageTypeCode.RESPONSE) then
+     if(length < 9) then
+       warplog("incomplete message line 28")
+       return false
+     end
+     local a = tonumber(string.byte(message, offset+6, offset+6));
+     local b = tonumber(string.byte(message, offset+7, offset+7));
+     local c = tonumber(string.byte(message, offset+8, offset+8));
+     local d = tonumber(string.byte(message, offset+9, offset+9));     
+     local payLoadSize = (a*16777216) + (b*65536) + (c*256) + d;     
+     payLoadSize = tonumber(payLoadSize);
+     if((payLoadSize+9) <= length) then
+       return true
+     end
+     warplog("incomplete message line 40")
+     return false
+          
+   elseif(messageType == WarpMessageTypeCode.UPDATE) then
+     if(length < 8) then      
+       warplog("incomplete message line 45")
+       return false
+     end
+     local a = tonumber(string.byte(message, offset+5, offset+5));
+     local b = tonumber(string.byte(message, offset+6, offset+6));
+     local c = tonumber(string.byte(message, offset+7, offset+7));
+     local d = tonumber(string.byte(message, offset+8, offset+8));     
+     local payLoadSize = (a*16777216) + (b*65536) + (c*256) + d;     
+     payLoadSize = tonumber(payLoadSize);
+     if((payLoadSize+8) <= length) then
+       return true
+     end
+     warplog("incomplete message line 57")
+     return false 
+   else
+     assert(false)
+   end
  end
  
  function buildLiveRoomInfoTable(payLoadTable)
@@ -35,14 +77,13 @@ end
     return LiveRoomInfo
  end
  
- function buildMatchedRoomsTable(payLoadTable)
-     
+ function buildMatchedRoomsTable(payLoadTable)  
     local MatchingRooms = {} 
     local n = 0
     for k,v in pairs(payLoadTable) do
-      n = n+1      
-      MatchingRooms[n]=v
-	  MatchingRooms[n].id = k
+      n = n+1     
+       MatchingRooms[n]=v
+      MatchingRooms[n].id = k
     end        
     return MatchingRooms
  end 
@@ -62,8 +103,6 @@ end
  function decodeWarpResponseMessage(message, offset)
 
    local length = string.len(message) - offset;
-   
-   warplog("decodeWarpResponseMessage buffer length: " .. length)
        
    local messageType = string.byte(message, offset+1, offset+1);
    local requestType = string.byte(message, offset+2, offset+2);
@@ -79,17 +118,8 @@ end
    local payLoadSize = (a*16777216) + (b*65536) + (c*256) + d;
    
    local payloadSize = tonumber(payLoadSize);
-   
-   warplog("messageType " .. messageType);
-   warplog("requestType " .. requestType);
-   warplog("resultCode " .. resultCode);
-   warplog("reserved " .. reserved);
-   warplog("payloadType " .. payloadType);
-   warplog("payloadSize " .. payloadSize);
-   
+  
    local payLoad = string.sub(message, offset+10, offset+10+payloadSize-1);
-   
-   warplog("payLoad " .. payLoad);
    
    return requestType, resultCode, payLoad, payloadSize+9
    
@@ -98,8 +128,6 @@ end
  function decodeWarpNotifyMessage(message, offset)
 
    local length = string.len(message) - offset;
-   
-   warplog("decodeWarpNotifyMessage buffer length: " .. length)
        
    local messageType = string.byte(message, offset+1, offset+1);
    local notifyType = string.byte(message, offset+2, offset+2);
@@ -115,22 +143,18 @@ end
    
    local payloadSize = tonumber(payLoadSize);
    
-   warplog("messageType " .. messageType);
-   warplog("notifyType " .. notifyType);
-   warplog("reserved " .. reserved);
-   warplog("payloadType " .. payloadType);
-   warplog("payloadSize " .. payloadSize);
-   
    local payLoad = string.sub(message, offset+9, offset+9+payloadSize-1);
-   
-   warplog("payLoad " .. payLoad);
-   
-   return notifyType, payLoad, 8+payloadSize
+   return notifyType,reserved, payLoad, 8+payloadSize
    
   end   
   
  function getLookupRequest() 
-    local message = "GET /lookup?api=".. tostring(WarpConfig.apiKey).." HTTP/1.0\r\n\ Accept:text/html\r\n Connection:keep-alive\r\n\r\n";  
+    local message = nil;
+    if(string.len(WarpConfig.geo)>0) then
+      message = "GET /lookup?api=".. tostring(WarpConfig.apiKey).."&geo="..tostring(WarpConfig.geo).." HTTP/1.0\r\n\ Accept:text/html\r\n Connection:keep-alive\r\n\r\n"; 
+    else
+      message = "GET /lookup?api=".. tostring(WarpConfig.apiKey).." HTTP/1.0\r\n\ Accept:text/html\r\n Connection:keep-alive\r\n\r\n"; 
+    end
     return message
   end
   

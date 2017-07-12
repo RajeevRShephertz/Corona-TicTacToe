@@ -21,13 +21,13 @@ local WarpRequestBuilder = {}
   function WarpRequestBuilder.buildAuthRequest(user, sid)
    local timeStamp = os.time()*1000;
    authTable ={}
-   authTable["version"] =  "Lua_1.0";
+   authTable["version"] =  "Lua_1.10.2";
    authTable["timeStamp"] =  timeStamp;
    authTable["user"] =  user;
    authTable["apiKey"] =  WarpConfig.apiKey;
-   authTable["signature"] =  calculateSignature(WarpConfig.apiKey, "Lua_1.0", user, timeStamp, WarpConfig.secretKey);
+   authTable["signature"] =  calculateSignature(WarpConfig.apiKey, "Lua_1.10.2", user, timeStamp, WarpConfig.secretKey);
    authTable["keepalive"] =  WarpConfig.keepAliveInterval;
-   authTable["recoverytime"] =  RecoveryTime;
+   authTable["recoverytime"] =  WarpConfig.recoveryAllowance;
    local authMessage = JSON:encode(authTable);  
    local lengthPayload = string.len(tostring(authMessage));
    local warpMessage = WarpRequestBuilder.buildWarpRequest(WarpMessageTypeCode.REQUEST, sid, 0, WarpRequestTypeCode.AUTH, 0, WarpContentTypeCode.JSON, lengthPayload, tostring(authMessage));
@@ -49,6 +49,15 @@ local WarpRequestBuilder = {}
    local userMessage = JSON:encode(userTable);  
    local lengthPayload = string.len(tostring(userMessage));
    local warpMessage = WarpRequestBuilder.buildWarpRequest(WarpMessageTypeCode.REQUEST, WarpConfig.session_id, 0, WarpRequestTypeCode.GET_USER_INFO, 0, WarpContentTypeCode.JSON, lengthPayload, tostring(userMessage));
+   return warpMessage
+ end
+
+  function WarpRequestBuilder.buildUserStatusRequest(username)
+   local userTable ={}
+   userTable["name"] =  username;  
+   local userMsg = JSON:encode(userTable);  
+   local lengthPayload = string.len(tostring(userMsg));
+   local warpMessage = WarpRequestBuilder.buildWarpRequest(WarpMessageTypeCode.REQUEST, WarpConfig.session_id, 0, WarpRequestTypeCode.GET_ONLINE_USER_STATUS, 0, WarpContentTypeCode.JSON, lengthPayload, tostring(userMsg));
    return warpMessage
  end
  
@@ -108,9 +117,36 @@ local WarpRequestBuilder = {}
     local warpMessage = WarpRequestBuilder.buildWarpRequest(WarpMessageTypeCode.REQUEST, WarpConfig.session_id, 0, WarpRequestTypeCode.UPDATE_PEERS, 0, WarpContentTypeCode.BINARY,
      lengthPayload, tostring(update));
    return warpMessage
-  end 
+  end
+  
+   function WarpRequestBuilder.buildPrivateUpdateRequest(username,update)
+    local updateRequest=string.char(string.len(tostring(username)));
+	updateRequest = updateRequest ..username;
+    updateRequest = updateRequest ..update;
+    local lengthPayload = string.len(tostring(updateRequest));
+    local warpMessage = WarpRequestBuilder.buildWarpRequest(WarpMessageTypeCode.REQUEST, WarpConfig.session_id, 0, WarpRequestTypeCode.PRIVATE_UPDATE, 0, WarpContentTypeCode.BINARY,
+     lengthPayload, tostring(updateRequest));
+   return warpMessage
+  end
+  
+    function WarpRequestBuilder.buildUDPPrivateUpdateRequest(username,update)
+    local updateRequest=string.char(string.len(tostring(username)));
+	updateRequest = updateRequest .. username;
+    updateRequest = updateRequest .. update;
+    local lengthPayload = string.len(tostring(updateRequest));
+    local warpMessage = WarpRequestBuilder.buildWarpRequest(WarpMessageTypeCode.REQUEST, WarpConfig.session_id, 0, WarpRequestTypeCode.PRIVATE_UPDATE, 0, WarpContentTypeCode.BINARY,
+     lengthPayload, tostring(updateRequest));
+   return warpMessage
+  end
+  
+  function WarpRequestBuilder.buildUDPUpdatePeersRequest(update)
+    local lengthPayload = string.len(update);
+    local warpMessage = WarpRequestBuilder.buildWarpRequest(WarpMessageTypeCode.REQUEST, WarpConfig.session_id, 0, WarpRequestTypeCode.UPDATE_PEERS, 2, WarpContentTypeCode.BINARY,
+     lengthPayload, tostring(update));
+   return warpMessage
+  end
  
-  function WarpRequestBuilder.buildCreateRoomRequest(name, owner, maxUsers, properties, turnTime)
+  function WarpRequestBuilder.buildCreateRoomRequest(name, owner, maxUsers, properties, turnTime, cleanupTime)
     local roomCreateTable = {}
     roomCreateTable["name"] = name
     roomCreateTable["owner"] = owner
@@ -120,6 +156,10 @@ local WarpRequestBuilder = {}
       roomCreateTable["turnTime"] = turnTime
       roomCreateTable["inox"] = true
     end
+	
+	if(cleanupTime ~= nil) then
+		roomCreateTable["cleanup"] = cleanupTime
+	end
     
     local roomCreateMessage = JSON:encode(roomCreateTable)
     local lengthPayload = string.len(tostring(roomCreateMessage));

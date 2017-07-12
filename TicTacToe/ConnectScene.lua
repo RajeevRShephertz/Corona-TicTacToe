@@ -22,8 +22,11 @@ function scene:createScene( event )
 	display.setDefault( "background", 255, 255, 255 )
   
 	statusText = display.newText( "Click to Connect to Start", 0, 0, native.systemFontBold, 24 )
-	statusText:setTextColor( 115 )
-	statusText:setReferencePoint( display.CenterReferencePoint )
+	statusText:setTextColor( 1, 0.5, 0 )
+ 	--statusText:setReferencePoint( display.CenterReferencePoint )
+ 	statusText.anchorX = 0.5
+	statusText.anchorY = 0
+
 	statusText.x, statusText.y = display.contentWidth * 0.5, 50
 	screenGroup:insert( statusText )	   
   
@@ -45,7 +48,7 @@ function scene:createScene( event )
                     else 
                       statusText.text = "Connecting.."
                       USER_NAME = tostring(os.clock())
-                      appWarpClient.connectWithUserName(USER_NAME) -- join with a random name
+                      appWarpClient.connectWithUserName("Rajeev") -- join with a random name
                     end
                 end
             end

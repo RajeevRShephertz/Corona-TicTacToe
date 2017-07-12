@@ -14,10 +14,10 @@ local widget = require "widget"
 storyboard.gotoScene( "ConnectScene", "fade", 400 )
 
 -- Replace these with the values from AppHQ dashboard of your AppWarp app
-API_KEY = "YOUR_API_KEY_HERE"
-SECRET_KEY = "YOUR_SECRET_KEY_HERE"
+API_KEY = "cad2bfab6310acd9696187b98682925125e469ab0d0d585db0b00609f461b791"
+SECRET_KEY = "55811709916e7ce4405cde0cdc5a254cf4b506fbafdae05760a73100b8080b67"
 ROOM_ID = ""
-USER_NAME = ""
+USER_NAME = "Rajeev"
 REMOTE_USER = ""
 ROOM_ADMIN = ""
 
@@ -25,7 +25,7 @@ ROOM_ADMIN = ""
 appWarpClient = require "AppWarp.WarpClient"
 appWarpClient.initialize(API_KEY, SECRET_KEY)
 
---appWarpClient.enableTrace(true)
+appWarpClient.enableTrace(true)
 
 -- IMPORTANT! loop WarpClient. This is required for receiving responses and notifications
 local function gameLoop(event)

@@ -35,7 +35,9 @@
      ["USER_PAUSED"] = 14,
      ["USER_RESUMED"] = 15,
      ["GAME_STARTED"] = 16,
-     ["GAME_STOPPED"] = 17
+     ["GAME_STOPPED"] = 17,
+     ["PRIVATE_UPDATE"]=18,
+     ["NEXT_TURN_REQUESTED"]=19
   }
   
   WarpRequestTypeCode = {
@@ -100,6 +102,8 @@
     
      ["MOVE"] = 31,
     
+     ["PRIVATE_UPDATE"]=32,
+	 
      ["LOCK_PROPERTIES"] = 35,
     
      ["UNLOCK_PROPERTIES"] = 36,
@@ -118,7 +122,21 @@
      
      ["STOP_GAME"] = 67,
      
-     ["GET_MOVE_HISTORY"] = 68
+     ["GET_MOVE_HISTORY"] = 68,
+	 
+     ["SET_NEXT_TURN"]=69,
+
+     ["GET_ROOMS_COUNT"] = 70,
+	 
+     ["GET_USERS_COUNT"]=71,
+
+     ["GET_ROOM_IN_RANGE_WITH_PROP"] = 73,
+	 
+     ["GET_ONLINE_USER_STATUS"]=74,
+
+     ["JOIN_AND_SUBSCRIBE_ROOM"]=75,
+
+     ["LEAVE_AND_UNSUBSCRIBE_ROOM"]=76
   }
   
   WarpResponseResultCode = {    
@@ -131,5 +149,6 @@
      ["UNKNOWN_ERROR"] = 6,
      ["RESULT_SIZE_ERROR"] = 7,
      ["SUCCESS_RECOVERED"] = 8,
-     ["CONNECTION_ERROR_RECOVERABLE"] = 9
+     ["CONNECTION_ERROR_RECOVERABLE"] = 9,
+     ["USER_PAUSED_ERROR"]=10
   }
